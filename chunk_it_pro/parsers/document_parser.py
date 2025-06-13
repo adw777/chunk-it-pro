@@ -2,30 +2,28 @@ import os
 import tempfile
 from pathlib import Path
 from typing import List, Tuple, Union
-from omniparse import parse_file_with_omniparse
-import config
+
+from .omniparse import parse_file_with_omniparse
+from ..config import Config
+
 
 class DocumentParser:
-    """Parse various document formats and convert to markdown using omniparse.py"""
+    """Parse various document formats and convert to markdown using omniparse"""
     
-    def __init__(self, api_url: str = config.OMNIPARSE_API_URL):
-        self.supported_formats = {'.pdf', '.txt', '.docx', '.md'}
-        self.api_url = api_url
+    def __init__(self, api_url: str = None):
+        self.supported_formats = Config.SUPPORTED_FORMATS
+        self.api_url = api_url or Config.OMNIPARSE_API_URL
     
     def parse_document(self, file_path: Union[str, Path]) -> str:
-        """Parse document and return markdown content using omniparse.py"""
+        """Parse document and return markdown content using omniparse"""
         file_path = Path(file_path)
         
         if file_path.suffix.lower() not in self.supported_formats:
             raise ValueError(f"Unsupported format: {file_path.suffix}")
         
-        # Use omniparse.py for all file parsing
         try:
             content = parse_file_with_omniparse(str(file_path), self.api_url)
-            
-            # Convert to markdown format if needed
             return self._ensure_markdown_format(content, file_path.suffix.lower())
-            
         except Exception as e:
             raise ValueError(f"Failed to parse document {file_path}: {str(e)}")
     
@@ -77,4 +75,4 @@ class DocumentParser:
             elif line.startswith('---') or line.startswith('***'):
                 breakpoints.append((i, "section_break"))
         
-        return breakpoints
+        return breakpoints 

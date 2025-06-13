@@ -1,48 +1,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import List, Tuple
+from typing import List
 from openai import OpenAI
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
-from voyage import VoyageAISingleton
 from sentence_transformers import SentenceTransformer
 import os
-import config
 
-from dotenv import load_dotenv
+from .voyage_client import VoyageAISingleton
+from ..config import Config
 
-load_dotenv()
 
 class EmbeddingAnalyzer:
     """Generate embeddings and compute similarity threshold"""
-    """
-    options for embedding models:
-    text-embedding-3-large
-    text-embedding-3-small
-    voyage-law-2
-    """
     
-    def __init__(self, api_key: str = None, model: str = config.OPENAI_MODEL):
-        self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
-        self.voyage_client = VoyageAISingleton()
-        self.s = None
-        self.model = model
+    def __init__(self, api_key: str = None, model: str = None):
+        # Initialize OpenAI client only if API key is available
+        openai_key = api_key or Config.OPENAI_API_KEY
+        self.client = OpenAI(api_key=openai_key) if openai_key else None
+        
+        # Initialize VoyageAI client
+        try:
+            self.voyage_client = VoyageAISingleton()
+        except Exception:
+            self.voyage_client = None
+            
+        self._finetuned_model = None
+        self.model = model or Config.OPENAI_MODEL
         self.embeddings = None
         self.similarity_threshold = None
 
     @property
     def finetuned_model(self):
+        """Lazy initialization of the fine-tuned model"""
         if self._finetuned_model is None:
-            self._finetuned_model = SentenceTransformer(config.AXON_DENDRITEPLUS_MODEL)
+            self._finetuned_model = SentenceTransformer(Config.AXON_MODEL)
             self._finetuned_model.max_seq_length = 512
         return self._finetuned_model
 
     async def generate_axon_embeddings(self, chunks: List[str]) -> np.ndarray:
         """Generate embeddings for all chunks using Axon"""
-        print(f"Generating embeddings for {len(chunks)} chunks...")
+        print(f"Generating embeddings for {len(chunks)} chunks using Axon...")
         
         embeddings = []
-        batch_size = 100  # Process in batches to avoid rate limits
+        batch_size = Config.EMBEDDING_BATCH_SIZE
         
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i + batch_size]
@@ -62,10 +63,10 @@ class EmbeddingAnalyzer:
 
     async def generate_voyage_embeddings(self, chunks: List[str]) -> np.ndarray:
         """Generate embeddings for all chunks using VoyageAI"""
-        print(f"Generating embeddings for {len(chunks)} chunks...")
+        print(f"Generating embeddings for {len(chunks)} chunks using VoyageAI...")
         
         embeddings = []
-        batch_size = 100  # Process in batches to avoid rate limits
+        batch_size = Config.EMBEDDING_BATCH_SIZE
         
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i + batch_size]
@@ -84,11 +85,11 @@ class EmbeddingAnalyzer:
         return self.embeddings
 
     async def generate_openai_embeddings(self, chunks: List[str]) -> np.ndarray:
-        """Generate embeddings for all chunks"""
-        print(f"Generating embeddings for {len(chunks)} chunks...")
+        """Generate embeddings for all chunks using OpenAI"""
+        print(f"Generating embeddings for {len(chunks)} chunks using OpenAI...")
         
         embeddings = []
-        batch_size = 100  # Process in batches to avoid rate limits
+        batch_size = Config.EMBEDDING_BATCH_SIZE
         
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i + batch_size]
@@ -127,13 +128,16 @@ class EmbeddingAnalyzer:
         distances = []
         for i in range(len(self.embeddings) - 1):
             similarity = cosine_similarity([self.embeddings[i]], [self.embeddings[i + 1]])[0][0]
-            distance = 1 - similarity  # Convert similarity to distance
+            distance = 1 - similarity
             distances.append(distance)
         
         return np.array(distances)
 
-    def plot_cosine_distances(self, distances: np.ndarray, save_path: str = "cosine_distances.png"):
+    def plot_cosine_distances(self, distances: np.ndarray, save_path: str = None):
         """Plot cosine distances"""
+        if save_path is None:
+            save_path = Config.DEFAULT_OUTPUT_FILES["cosine_plot"]
+            
         plt.figure(figsize=(12, 6))
         plt.plot(distances, marker='o', linewidth=2, markersize=4)
         plt.title('Cosine Distances Between Consecutive Chunks')
@@ -145,8 +149,11 @@ class EmbeddingAnalyzer:
         plt.show()
     
     def compute_similarity_threshold(self, distances: np.ndarray, method: str = "percentile", 
-                                   percentile: float = 95) -> float:
+                                   percentile: float = None) -> float:
         """Compute similarity threshold using different methods"""
+        
+        if percentile is None:
+            percentile = Config.DEFAULT_PERCENTILE
         
         if method == "percentile":
             threshold_distance = np.percentile(distances, percentile)
@@ -173,23 +180,29 @@ class EmbeddingAnalyzer:
                 threshold_similarity = 1 - threshold_distance
         
         else:
-            raise ValueError(f"Unknown method: {method}")
+            raise ValueError(f"Unknown method: {method}. Available methods: {Config.THRESHOLD_METHODS}")
         
         self.similarity_threshold = threshold_similarity
         
         print(f"Computed similarity threshold using {method}: {threshold_similarity:.4f}")
         return threshold_similarity
     
-    def save_embeddings(self, file_path: str = "embeddings.npy"):
+    def save_embeddings(self, file_path: str = None):
         """Save embeddings to file"""
         if self.embeddings is None:
             raise ValueError("No embeddings to save")
         
+        if file_path is None:
+            file_path = Config.DEFAULT_OUTPUT_FILES["embeddings"]
+        
         np.save(file_path, self.embeddings)
         print(f"Saved embeddings to {file_path}")
 
-    def load_embeddings(self, file_path: str = "embeddings.npy"):
+    def load_embeddings(self, file_path: str = None):
         """Load embeddings from file"""
+        if file_path is None:
+            file_path = Config.DEFAULT_OUTPUT_FILES["embeddings"]
+            
         self.embeddings = np.load(file_path)
         print(f"Loaded embeddings from {file_path}")
         return self.embeddings

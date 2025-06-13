@@ -1,6 +1,7 @@
 import threading
 from weakref import WeakKeyDictionary
 
+
 class Singleton(type):
     """
     Thread-safe Singleton metaclass.
@@ -18,4 +19,4 @@ class Singleton(type):
             with cls._lock:
                 if cls not in cls._instances:
                     cls._instances[cls] = super().__call__(*args, **kwargs)
-        return cls._instances[cls]
+        return cls._instances[cls] 
