@@ -1,7 +1,7 @@
 ChunkIt Pro Documentation
 =========================
 
-ChunkIt Pro is a powerful Python library for intelligent document chunking using semantic analysis.
+ChunkIt Pro is a Python library for intelligent document chunking using semantic analysis.
 
 .. toctree::
    :maxdepth: 2
