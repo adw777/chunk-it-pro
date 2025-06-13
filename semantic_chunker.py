@@ -6,7 +6,7 @@ import tiktoken
 
 
 class SemanticChunker:
-    """Implement semantic chunking algorithm following the flowchart"""
+    """semantic chunking"""
     
     def __init__(self, similarity_threshold: float, max_chunk_len: int = 1024, 
                  tokenizer_name: str = "cl100k_base"):
@@ -22,7 +22,7 @@ class SemanticChunker:
     
     def semantic_chunk(self, text: str, embeddings: np.ndarray) -> List[str]:
         """
-        Main semantic chunking function following the flowchart logic
+        Main semantic chunking function
         """
         # Split text into sentences
         sentences = nltk.sent_tokenize(text)

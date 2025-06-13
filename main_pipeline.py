@@ -6,7 +6,7 @@ from initial_chunker import InitialChunker
 from embedding_analyzer import EmbeddingAnalyzer
 from semantic_chunker import SemanticChunker
 import nltk
-
+import asyncio
 
 class SemanticChunkingPipeline:
     """Complete semantic chunking pipeline"""
@@ -23,8 +23,9 @@ class SemanticChunkingPipeline:
         self.embeddings = None
         self.similarity_threshold = None
         self.semantic_chunks = None
+        self.semantic_chunk_distances = None
     
-    def process_document(self, file_path: str, threshold_method: str = "percentile", 
+    async def process_document(self, file_path: str, threshold_method: str = "percentile", 
                         percentile: float = 95, max_chunk_len: int = 1024) -> tuple:
         """
         Complete pipeline: document -> semantic chunks
@@ -37,7 +38,7 @@ class SemanticChunkingPipeline:
             
         Returns:
             tuple: (initial_chunks, semantic_chunks, similarity_threshold)
-        """
+        """ 
         
         print("="*60)
         print("SEMANTIC CHUNKING PIPELINE")
@@ -66,7 +67,9 @@ class SemanticChunkingPipeline:
         
         # Step 4: Generate embeddings
         print("\n4. Generating embeddings...")
-        self.embeddings = self.embedding_analyzer.generate_embeddings(self.initial_chunks)
+        # self.embeddings = await self.embedding_analyzer.generate_openai_embeddings(self.initial_chunks)
+        self.embeddings = await self.embedding_analyzer.generate_voyage_embeddings(self.initial_chunks)
+        # self.embeddings = await self.embedding_analyzer.generate_axon_embeddings(self.initial_chunks)
         self.embedding_analyzer.normalize_embeddings()
         self.embedding_analyzer.save_embeddings("embeddings.npy")
         
@@ -94,7 +97,9 @@ class SemanticChunkingPipeline:
         
         # Generate sentence-level embeddings
         print("   Generating sentence-level embeddings...")
-        sentence_embeddings = self.embedding_analyzer.generate_embeddings(sentences)
+        # sentence_embeddings = await self.embedding_analyzer.generate_openai_embeddings(sentences)
+        sentence_embeddings = await self.embedding_analyzer.generate_voyage_embeddings(sentences)
+        # sentence_embeddings = await self.embedding_analyzer.generate_axon_embeddings(sentences)
         self.embedding_analyzer.normalize_embeddings()
         
         # Perform semantic chunking
@@ -158,7 +163,7 @@ class SemanticChunkingPipeline:
         }
 
 
-def main():
+async def main():
     """Example usage"""
     # Initialize pipeline
     pipeline = SemanticChunkingPipeline(openai_api_key=os.getenv("OPENAI_API_KEY"))
@@ -173,7 +178,7 @@ def main():
     
     try:
         # Process document
-        initial_chunks, semantic_chunks, threshold = pipeline.process_document(
+        initial_chunks, semantic_chunks, threshold = await pipeline.process_document(
             file_path=document_path,
             threshold_method="percentile",  # or "gradient", "local_maxima"
             percentile=95,
@@ -195,4 +200,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

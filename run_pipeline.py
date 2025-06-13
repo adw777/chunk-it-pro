@@ -8,6 +8,7 @@ import json
 import time
 from pathlib import Path
 from typing import Dict, Any
+import asyncio
 
 from main_pipeline import SemanticChunkingPipeline
 from utils import (
@@ -93,7 +94,7 @@ Examples:
     return parser.parse_args()
 
 
-def main():
+async def main():
     """Main execution function"""
     args = parse_arguments()
     
@@ -130,7 +131,7 @@ def main():
         print(f"\nProcessing: {args.document_path}")
         print(f"File size: {metadata['file_size']}")
         
-        initial_chunks, semantic_chunks, threshold = pipeline.process_document(
+        initial_chunks, semantic_chunks, threshold = await pipeline.process_document(
             file_path=args.document_path,
             threshold_method=args.method,
             percentile=args.percentile,
@@ -222,7 +223,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
 
 """

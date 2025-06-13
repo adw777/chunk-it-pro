@@ -4,7 +4,10 @@ from typing import List, Tuple
 from openai import OpenAI
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
+from voyage import VoyageAISingleton
+from sentence_transformers import SentenceTransformer
 import os
+import config
 
 from dotenv import load_dotenv
 
@@ -12,14 +15,75 @@ load_dotenv()
 
 class EmbeddingAnalyzer:
     """Generate embeddings and compute similarity threshold"""
+    """
+    options for embedding models:
+    text-embedding-3-large
+    text-embedding-3-small
+    voyage-law-2
+    """
     
-    def __init__(self, api_key: str = None, model: str = "text-embedding-3-small"):
+    def __init__(self, api_key: str = None, model: str = config.OPENAI_MODEL):
         self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
+        self.voyage_client = VoyageAISingleton()
+        self.s = None
         self.model = model
         self.embeddings = None
         self.similarity_threshold = None
-    
-    def generate_embeddings(self, chunks: List[str]) -> np.ndarray:
+
+    @property
+    def finetuned_model(self):
+        if self._finetuned_model is None:
+            self._finetuned_model = SentenceTransformer(config.AXON_DENDRITEPLUS_MODEL)
+            self._finetuned_model.max_seq_length = 512
+        return self._finetuned_model
+
+    async def generate_axon_embeddings(self, chunks: List[str]) -> np.ndarray:
+        """Generate embeddings for all chunks using Axon"""
+        print(f"Generating embeddings for {len(chunks)} chunks...")
+        
+        embeddings = []
+        batch_size = 100  # Process in batches to avoid rate limits
+        
+        for i in range(0, len(chunks), batch_size):
+            batch = chunks[i:i + batch_size]
+            
+            try:
+                batch_embeddings = self.finetuned_model.encode(batch)
+                embeddings.extend(batch_embeddings)
+                
+                print(f"Processed batch {i//batch_size + 1}/{(len(chunks)-1)//batch_size + 1}")
+                
+            except Exception as e:
+                print(f"Error processing batch {i//batch_size + 1}: {e}")
+                raise
+        
+        self.embeddings = np.array(embeddings)
+        return self.embeddings
+
+    async def generate_voyage_embeddings(self, chunks: List[str]) -> np.ndarray:
+        """Generate embeddings for all chunks using VoyageAI"""
+        print(f"Generating embeddings for {len(chunks)} chunks...")
+        
+        embeddings = []
+        batch_size = 100  # Process in batches to avoid rate limits
+        
+        for i in range(0, len(chunks), batch_size):
+            batch = chunks[i:i + batch_size]
+            
+            try:
+                batch_embeddings = await self.voyage_client.embed_doc(batch)
+                embeddings.extend(batch_embeddings)
+                
+                print(f"Processed batch {i//batch_size + 1}/{(len(chunks)-1)//batch_size + 1}")
+                
+            except Exception as e:
+                print(f"Error processing batch {i//batch_size + 1}: {e}")
+                raise
+        
+        self.embeddings = np.array(embeddings)
+        return self.embeddings
+
+    async def generate_openai_embeddings(self, chunks: List[str]) -> np.ndarray:
         """Generate embeddings for all chunks"""
         print(f"Generating embeddings for {len(chunks)} chunks...")
         
@@ -54,7 +118,7 @@ class EmbeddingAnalyzer:
         
         self.embeddings = normalize(self.embeddings, norm='l2')
         return self.embeddings
-    
+
     def compute_cosine_distances(self) -> np.ndarray:
         """Compute cosine distances between consecutive chunks"""
         if self.embeddings is None:
@@ -67,7 +131,7 @@ class EmbeddingAnalyzer:
             distances.append(distance)
         
         return np.array(distances)
-    
+
     def plot_cosine_distances(self, distances: np.ndarray, save_path: str = "cosine_distances.png"):
         """Plot cosine distances"""
         plt.figure(figsize=(12, 6))
@@ -123,7 +187,7 @@ class EmbeddingAnalyzer:
         
         np.save(file_path, self.embeddings)
         print(f"Saved embeddings to {file_path}")
-    
+
     def load_embeddings(self, file_path: str = "embeddings.npy"):
         """Load embeddings from file"""
         self.embeddings = np.load(file_path)

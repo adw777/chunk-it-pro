@@ -4,6 +4,18 @@
 OPENAI_MODEL = "text-embedding-3-small"
 OPENAI_API_KEY = None
 
+# VoyageAI Configuration
+VOYAGE_MODEL = "voyage-law-2"
+VOYAGE_API_KEY = None
+
+# Omniparse Configuration
+OMNIPARSE_API_KEY = None
+OMNIPARSE_API_URL = "https://yrtc6mucd0e0.share.zrok.io/parse_document"
+
+# axon_dendriteplus Configuration
+AXON_DENDRITEPLUS_MODEL = "axondendriteplus/Legal-Embed-intfloat-multilingual-e5-large-instruct"
+AXON_DENDRITEPLUS_API_KEY = None
+
 # Tokenizer Configuration
 TOKENIZER_NAME = "cl100k_base"
 
@@ -13,7 +25,7 @@ MIN_CHUNK_SIZE = 10  # minimum tokens for valid chunk
 
 # Semantic Chunking Configuration
 MAX_CHUNK_LENGTH_SECOND_PASS = 1024  # tokens
-DEFAULT_SIMILARITY_THRESHOLD = 0.8
+DEFAULT_SIMILARITY_THRESHOLD = 0.5
 
 # Threshold Computation Methods
 THRESHOLD_METHODS = {
