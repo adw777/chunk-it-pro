@@ -1,9 +1,3 @@
-"""
-ChunkIt Pro - Semantic Document Chunking Library
-
-A comprehensive library for intelligent document chunking using semantic analysis.
-"""
-
 from .pipeline import SemanticChunkingPipeline
 from .config import Config
 

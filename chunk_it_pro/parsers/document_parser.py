@@ -1,5 +1,3 @@
-"""Document parser for various file formats"""
-
 import os
 import tempfile
 from pathlib import Path

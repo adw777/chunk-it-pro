@@ -1,5 +1,3 @@
-"""Semantic chunking module for intelligent content segmentation"""
-
 import numpy as np
 import nltk
 from typing import List

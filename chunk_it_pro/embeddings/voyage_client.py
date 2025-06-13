@@ -1,5 +1,3 @@
-"""VoyageAI client for embedding generation"""
-
 from typing import List, Union
 from collections import defaultdict
 from voyageai.object.embeddings import EmbeddingsObject

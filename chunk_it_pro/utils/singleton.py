@@ -1,5 +1,3 @@
-"""Thread-safe Singleton metaclass implementation"""
-
 import threading
 from weakref import WeakKeyDictionary
 

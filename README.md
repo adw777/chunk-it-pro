@@ -1,14 +1,14 @@
 # ChunkIt Pro - Semantic Document Chunking Library
 
-Python library for intelligent document chunking using semantic analysis. ChunkIt Pro breaks down documents into meaningful segments based on content similarity rather than arbitrary size limits.
+Python library for document chunking using semantic analysis. ChunkIt Pro breaks down documents into meaningful segments based on content similarity rather than arbitrary size limits.
 
 ## Features
 
-- **Multiple Document Formats**: Supports PDF, DOCX, TXT, and Markdown files
-- **Semantic Analysis**: Uses advanced embedding models to understand content similarity
+- **Multiple Document Formats**: Supports PDF, DOCX, TXT, MARKDOWN
+- **Semantic Analysis**: Uses embedding models to understand content similarity
 - **Multiple Embedding Providers**: OpenAI, VoyageAI, and Sentence Transformers support
 - **Intelligent Chunking**: Two-pass algorithm for optimal chunk boundaries
-- **Configurable Thresholds**: Multiple methods for similarity threshold computation
+- **Configurable Thresholds**: Three methods for similarity threshold computation
 - **Visual Analysis**: Generates plots showing similarity patterns
 - **Easy Integration**: Simple API for quick integration into existing projects
 
@@ -60,7 +60,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### Convenience Function
+### Convenience Function (with default values)
 
 ```python
 import asyncio
@@ -96,18 +96,15 @@ asyncio.run(main())
 
 1. **VoyageAI** (Recommended for legal documents):
    - Model: `voyage-law-2`
-   - High quality embeddings for legal text
-   - Good performance/cost ratio
 
 2. **OpenAI**:
-   - Model: `text-embedding-3-small`
+   - Model: `text-embedding-3-large`
    - High quality general-purpose embeddings
-   - More expensive but very reliable
 
 3. **Axon** (Local):
-   - Model: Fine-tuned legal embedding model
+   - Model: Fine-tuned legal embedding model [Wasserstoff-AI/Legal-Embed-intfloat-multilingual-e5-large-instruct](https://huggingface.co/Wasserstoff-AI/Legal-Embed-intfloat-multilingual-e5-large-instruct)
    - Runs locally, no API costs
-   - Requires additional setup
+   - Requires sentence transfomers setup
 
 ### Threshold Methods
 
@@ -142,7 +139,7 @@ class SemanticChunkingPipeline:
 
 ### chunk_document Function
 
-Convenience function for quick document processing.
+Convenience function (default) for quick document processing.
 
 ```python
 async def chunk_document(
@@ -162,8 +159,8 @@ When `save_files=True`, the pipeline creates:
 
 - `initial_chunks.txt`: Fixed-size initial chunks (256 tokens each)
 - `semantic_chunks.txt`: Final semantic chunks
-- `embeddings.npy`: Numpy array of embeddings
-- `cosine_distances.png`: Visualization of similarity patterns
+- `embeddings.npy`: Numpy array of embeddings (for initial_chunks)
+- `cosine_distances.png`: Visualization of similarity patterns between initial_chunks
 
 ## Project Structure
 
@@ -195,9 +192,9 @@ chunk_it_pro/
 
 ## Algorithm Overview
 
-ChunkIt uses a sophisticated two-pass algorithm:
+ChunkIt uses two-pass algorithm:
 
-### Pass 1: Initial Chunking
+### Initial Chunking
 1. Parse document to markdown format
 2. Identify structural breakpoints (headers, page breaks)
 3. Create fixed-size chunks (256 tokens) respecting breakpoints
@@ -205,7 +202,7 @@ ChunkIt uses a sophisticated two-pass algorithm:
 5. Compute cosine distances between consecutive chunks
 6. Determine similarity threshold using statistical methods
 
-### Pass 2: Semantic Refinement
+### Semantic Refinement
 1. Split text into sentences
 2. Generate sentence-level embeddings
 3. Group sentences based on similarity threshold
@@ -266,19 +263,14 @@ asyncio.run(process_multiple_documents())
 1. **Missing API Keys**: Ensure environment variables are set correctly
 2. **Document Parsing Errors**: Check if Omniparse API is accessible
 3. **Memory Issues**: Reduce batch size or chunk size for large documents
-4. **NLTK Data**: The library automatically downloads required NLTK data
 
 ### Performance Tips
 
 1. Use VoyageAI for best performance/cost balance
 2. Adjust `max_chunk_len` based on your use case
 3. Set `save_files=False` for better performance when processing many documents
-4. Use local embedding models (Axon) for privacy-sensitive applications
+4. Use local embedding models (Axon) for privacy-sensitive applications & saving money
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 

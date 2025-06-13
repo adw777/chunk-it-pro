@@ -1,5 +1,3 @@
-"""Document parsing modules for ChunkIt Pro library"""
-
 from .document_parser import DocumentParser
 from .omniparse import parse_file_with_omniparse
 

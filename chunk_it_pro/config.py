@@ -1,5 +1,3 @@
-"""Configuration management for ChunkIt Pro library"""
-
 import os
 from typing import Dict, Any
 from dotenv import load_dotenv
@@ -17,7 +15,7 @@ class Config:
     OMNIPARSE_API_KEY = os.getenv("OMNIPARSE_API_KEY")
     
     # Model Settings
-    OPENAI_MODEL = "text-embedding-3-small"
+    OPENAI_MODEL = "text-embedding-3-large"
     VOYAGE_MODEL = "voyage-law-2"
     AXON_MODEL = "axondendriteplus/Legal-Embed-intfloat-multilingual-e5-large-instruct"
     

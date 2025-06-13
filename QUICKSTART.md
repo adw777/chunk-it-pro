@@ -1,7 +1,5 @@
 # ChunkIt Pro Quick Start Guide
 
-Get up and running with semantic document chunking in 5 minutes!
-
 ## Installation
 
 ```bash
@@ -148,17 +146,10 @@ print(status)  # Shows which API keys are set
 # Run the test script
 python test_installation.py
 ```
-
-### Memory Issues
-```python
-# Reduce batch size for large documents
-# Edit chunk_it_pro/config.py:
-# EMBEDDING_BATCH_SIZE = 50  # Default is 100
-```
-
 ## Next Steps
 
 1. Check out `example.py` for more detailed examples
+2. Check out `test_run.py` for quick usage (single doc & multiple-docs)
 2. Read `README.md` for complete documentation
 3. Explore the `chunk_it_pro/` package structure
 4. Customize configuration in `chunk_it_pro/config.py`
@@ -167,4 +158,5 @@ python test_installation.py
 
 - Test your installation: `python test_installation.py`
 - Example usage: `python example.py`
+- Quick usage @test_run.py (first, comment out the code you dont want to run!)
 - Configuration help: Check `chunk_it_pro/config.py` 

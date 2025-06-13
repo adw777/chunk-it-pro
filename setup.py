@@ -1,5 +1,3 @@
-"""Setup configuration for ChunkIt Pro semantic chunking library"""
-
 from setuptools import setup, find_packages
 from pathlib import Path
 
@@ -19,11 +17,11 @@ setup(
     name="chunk-it-pro",
     version="0.1.0",
     author="ChunkIt Pro Contributors",
-    author_email="your-email@example.com",
-    description="A powerful semantic document chunking library",
+    author_email="aman.dogra@thewasserstoff.com",
+    description="A semantic document chunking library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/chunk_it_pro",
+    url="https://github.com/adw777/chunk-it-pro",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -65,8 +63,8 @@ setup(
     },
     keywords="semantic chunking nlp document processing embedding similarity",
     project_urls={
-        "Bug Reports": "https://github.com/yourusername/chunk_it_pro/issues",
-        "Source": "https://github.com/yourusername/chunk_it_pro",
-        "Documentation": "https://chunk-it.readthedocs.io/",
+        "Bug Reports": "https://github.com/adw777/chunk-it-pro/issues",
+        "Source": "https://github.com/adw777/chunk-it-pro",
+        "Documentation": "https://chunk-it-pro.readthedocs.io/",
     },
 ) 

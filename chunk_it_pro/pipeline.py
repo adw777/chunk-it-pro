@@ -1,5 +1,3 @@
-"""Main semantic chunking pipeline"""
-
 import os
 import tempfile
 from pathlib import Path
@@ -223,7 +221,7 @@ class SemanticChunkingPipeline:
         print(f"\nSimilarity Threshold: {stats['similarity_threshold']:.4f}")
 
 
-# Convenience function for simple usage
+# Convenience function for simple usage (with default values)
 async def chunk_document(
     file_path: str,
     embedding_provider: str = "voyage",

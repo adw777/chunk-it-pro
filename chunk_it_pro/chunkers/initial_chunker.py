@@ -1,5 +1,3 @@
-"""Initial chunking module for creating fixed-size token chunks"""
-
 from typing import List, Tuple
 import tiktoken
 

@@ -1,5 +1,3 @@
-"""Omniparse API client for document parsing"""
-
 import requests
 import json
 from pathlib import Path
@@ -101,7 +99,7 @@ def parse_file_with_omniparse(file_path: str, api_url: str = None) -> str:
         }
         
         try:
-            response = requests.post(f"{api_url}/document", files=files)
+            response = requests.post(f"{api_url}", files=files)
             response.raise_for_status()
             
             result = response.json()
